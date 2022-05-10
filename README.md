@@ -8,4 +8,3 @@ Juan José Rodríguez Maulén
 Se observo madurez en peces cultivados en la región de Los Lagos, sometidos a regimen de fotoperiodo para prevenir la madurez
 
 ## Descripcion de las variables de estudio, factores a analizar y el número total de observaciones
-
