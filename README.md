@@ -12,4 +12,4 @@ Los datos de madurez, correspondieron a las observaciones realizadas en plantas 
 
 # Variable respuesta= % de maduración (Cuantitativa Discreta)
 # Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
-# N= 220 
+# N= 220 observaciones
