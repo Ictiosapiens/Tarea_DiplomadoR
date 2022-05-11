@@ -1,10 +1,10 @@
 ---
 title: "Proyecto personal de análisis de datos"
 author: "Juan José Rodríguez Maulén"
-date: '2022-05-10'
+date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -26,57 +26,31 @@ library(ggthemes)
 library(ggrepel)
 ```
 ```
+Evaluación de la Madurez en Salmon Coho (Coho Salmon (COS))
 
-## R Markdown
+Descripción del problema a analizar
+Se observó madurez en peces cultivados en la región de Los Lagos, sometidos a regimen de fotoperiodo para prevenir la madurez. El proveedor de fotoperiodo correspondió a la empresa ##BIOLED quienes utilizaron 3 intensidades lumínicas (W) en centros de cultivos de peces provenientes de las pisciculturas Huincara, Copipue, Lican y Lago Rupanco. En terminos de madurez observada por mix de jaulas, estas fluctuaron entre un 0 a un 20%, mientras que a nivel de centro de cultivo, esta alcanzo un 6,81% siendo aceptable un 5%.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Descripción de las variables de estudio, factores a analizar y el número total de observaciones
+Los datos de madurez, correspondieron a las observaciones realizadas en plantas de proceso, para la clasificación de calidades, donde una de las causales de degradación correspondio a madurez por jaula y centro de cultivo
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Variable respuesta= % de maduración (Cuantitativa Discreta)
+Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
+N= 220 observaciones
 
 ```{r Madurez COS}
 Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx", sheet = 2)
 #na="NA"
 summary(Madurez)
 head(Madurez)
-summary(Madurez)
+
+hist(Madurez$Fotoperiodo)
+hist(Madurez$Potencia)
+#hist(Madurez$percent_mature)
 ```
-
-## Exploración por Proveedor & Centro*Proveedor 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-#Madurez ~ Proveedor
-Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
-  clean_names()
-Madurez$site_name <- factor(Madurez$site_name, levels = c('Chidhuapi 1', 'Chope','Chidhuapi 2', 'Colaco 4','Punta Yoye','Teupa', 'Compu', 'Aulin','Cachihue', 'Chidhuapi 3','Linguar','Malomacum'))
-Madurez
-summary(Madurez)
-
-
-(Madurez <- Madurez %>% 
-   filter(!is.na(percent_mature)) %>% 
-   mutate(proveedor = fct_relevel(proveedor)) %>% 
-   ggplot(aes(site_name, percent_mature, fill=proveedor)) +
-   geom_jitter(shape=21, size=4, color="white", width = 0.2) +
-   geom_boxplot(alpha=.5, outlier.color = "NA") +
-   scale_fill_tableau() +
-   theme_minimal() +
-   scale_y_continuous(labels = percent) +
-   labs(title="% Madurez en planta segun Centro y Fotoperiodo",
-        subtitle = "Dato a nivel de unidad de proceso en planta") +
-   theme(axis.line.x = element_line())
-)+
-  labs( x="Site Name", 
-        y="Mature (%)")
-
-```
-
-#Corten
-
-```{r Madurez Proveedor, echo=FALSE}
+## Exploración por Proveedor 
+```{r, echo=FALSE}
+# Madurez ~ Proveedor 
 Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
   clean_names()
 (Madurez <- Madurez %>% 
@@ -96,5 +70,34 @@ labs( x="Proveedor",
      y="Mature (%)")
 
 ```
+## Exploración por Proveedor & Centro*Proveedor 
+```{r, echo=FALSE}
+#Madurez Jaula ~ Proveedor
+Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
+  clean_names()
+Madurez$site_name <- factor(Madurez$site_name, levels = c('Chidhuapi 1', 'Chope','Chidhuapi 2', 'Colaco 4','Punta Yoye','Teupa', 'Compu', 'Aulin','Cachihue', 'Chidhuapi 3','Linguar','Malomacum'))
+Madurez
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+(Madurez <- Madurez %>% 
+   filter(!is.na(percent_mature)) %>% 
+   mutate(proveedor = fct_relevel(proveedor)) %>% 
+   ggplot(aes(site_name, percent_mature, fill=proveedor)) +
+   geom_jitter(shape=21, size=4, color="white", width = 0.2) +
+   geom_boxplot(alpha=.5, outlier.color = "NA") +
+   scale_fill_tableau() +
+   theme_minimal() +
+   scale_y_continuous(labels = percent) +
+   labs(title="% Madurez en planta segun Centro y Fotoperiodo",
+        subtitle = "Dato a nivel de unidad de proceso en planta") +
+   theme(axis.line.x = element_line())
+)+
+  labs( x="Site Name", 
+        y="Mature (%)")
+
+```
+# Conclusiones
+
+De acuerdo a la exploración de datos, se puede evidenciar que el proveedor fotoperiodo, presento maduración en los centros de cultivos donde se implento la estrategia en comparación con los centros de cultivo donde no se encontraba implementada la estrategia de Fotoperiodo.
+
+El Centro de Cultivo que presento mayor madurez (> 5%) correspondio al centro Chidhuapi 1
