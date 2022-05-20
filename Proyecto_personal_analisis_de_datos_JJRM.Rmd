@@ -3,11 +3,24 @@ title: "Proyecto personal de análisis de datos"
 author: "Juan José Rodríguez Maulén"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE}
+Evaluación de la Madurez en Salmon Coho (Coho Salmon (COS))
+
+Descripción del problema a analizar
+Se observó madurez en peces cultivados en la región de Los Lagos, sometidos a regimen de fotoperiodo para prevenir la madurez. El proveedor de fotoperiodo correspondió a la empresa BIOLED quienes utilizaron 3 intensidades lumínicas (W) en centros de cultivos de peces provenientes de las pisciculturas Huincara, Copipue, Lican y Lago Rupanco. En terminos de madurez observada por mix de jaulas, estas fluctuaron entre un 0 a un 20%, mientras que a nivel de centro de cultivo, esta alcanzo un 6,81% siendo aceptable un 5%.
+
+Descripción de las variables de estudio, factores a analizar y el número total de observaciones
+Los datos de madurez, correspondieron a las observaciones realizadas en plantas de proceso, para la clasificación de calidades, donde una de las causales de degradación correspondio a madurez por jaula y centro de cultivo
+
+Variable respuesta= % de maduración (Cuantitativa Discreta)
+Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
+N= 220 observaciones.
+
+## Utiliza paquetes para importar y analizar
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 ## En este bloque de código podrían ir todos los paquetes que necesite habilitar o install.packages
 library(datasets)
@@ -25,31 +38,49 @@ library(scales)
 library(ggthemes)
 library(ggrepel)
 ```
+
+
+```{r echo=TRUE }
+Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx",na="NA", sheet = 2)
+
+Madurez <- na.omit(Madurez)
 ```
-Evaluación de la Madurez en Salmon Coho (Coho Salmon (COS))
 
-Descripción del problema a analizar
-Se observó madurez en peces cultivados en la región de Los Lagos, sometidos a regimen de fotoperiodo para prevenir la madurez. El proveedor de fotoperiodo correspondió a la empresa ##BIOLED quienes utilizaron 3 intensidades lumínicas (W) en centros de cultivos de peces provenientes de las pisciculturas Huincara, Copipue, Lican y Lago Rupanco. En terminos de madurez observada por mix de jaulas, estas fluctuaron entre un 0 a un 20%, mientras que a nivel de centro de cultivo, esta alcanzo un 6,81% siendo aceptable un 5%.
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
 
-Descripción de las variables de estudio, factores a analizar y el número total de observaciones
-Los datos de madurez, correspondieron a las observaciones realizadas en plantas de proceso, para la clasificación de calidades, donde una de las causales de degradación correspondio a madurez por jaula y centro de cultivo
-
-Variable respuesta= % de maduración (Cuantitativa Discreta)
-Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
-N= 220 observaciones
-
-```{r Madurez COS}
-Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx", sheet = 2)
-#na="NA"
+```{r echo=TRUE }
 summary(Madurez)
+str(Madurez)
 head(Madurez)
-
-hist(Madurez$Fotoperiodo)
-hist(Madurez$Potencia)
-#hist(Madurez$percent_mature)
+Madurez$`Jaula individual`<-as.factor(Madurez$`Jaula individual`)
+Madurez$Fotoperiodo <- as.factor(Madurez$Fotoperiodo)
 ```
+## Describa la variación de las variables usando histogramas
+```{r echo=TRUE}
+#Describe la variación de las variables de estudio usando histograma
+#hist(Madurez$Fotoperiodo,  main = "Fotoperiodo", col = "red")
+hist(Madurez$Potencia, main = "Potencia", col = "red")
+hist(Madurez$`%Mature`,main = "%Madurez", col = "red")
+Ma<-table(Madurez$`%Mature`)
+Fo<-table(Madurez$Fotoperiodo)
+Po<-table(Madurez$Potencia)
+barplot(Ma,col="deepskyblue4",  ylim=c(0,25))
+barplot(Fo,col="deepskyblue4",  ylim=c(0,25))
+barplot(Po,col="deepskyblue4",  ylim=c(0,25))
+#ggplot(Madurez, aes(x = Fotoperiodo)) +geom_histogram(bins = 30, color = "black", fill="red")
+ggplot(Madurez, aes(x = Potencia)) +geom_histogram(bins = 30, color = "black", fill="red")
+ggplot(Madurez, aes(x = `%Mature`)) +geom_histogram(bins = 30, color = "black", fill="red")
+plot(Madurez$`%Mature`~Madurez$Potencia)
+plot(density(Madurez$Potencia))
+plot(ecdf(Madurez$`%Mature`))
+plot(ecdf(Madurez$Potencia))
+plot(ecdf(Madurez$Fotoperiodo))
+```
+
 ## Exploración por Proveedor 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 # Madurez ~ Proveedor 
 Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
   clean_names()
@@ -62,7 +93,7 @@ Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>%
    scale_fill_tableau() +
    theme_minimal() +
    scale_y_continuous(labels = percent) +
-   labs(title="% Madurez en planta segun Centro y Fotoperiodo",
+   labs(title="% Madurez en planta según Fotoperiodo",
         subtitle = "Dato a nivel de unidad de proceso en planta") +
    theme(axis.line.x = element_line(),legend.position='none')
 )+
@@ -70,9 +101,10 @@ labs( x="Proveedor",
      y="Mature (%)")
 
 ```
-## Exploración por Proveedor & Centro*Proveedor 
-```{r, echo=FALSE}
-#Madurez Jaula ~ Proveedor
+
+## Exploración por Centro & Fotoperiodo 
+```{r echo=TRUE}
+#Madurez  ~ Centro + Fotoperiodo
 Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
   clean_names()
 Madurez$site_name <- factor(Madurez$site_name, levels = c('Chidhuapi 1', 'Chope','Chidhuapi 2', 'Colaco 4','Punta Yoye','Teupa', 'Compu', 'Aulin','Cachihue', 'Chidhuapi 3','Linguar','Malomacum'))
@@ -96,8 +128,49 @@ Madurez
         y="Mature (%)")
 
 ```
+
+
+## Exploración por Madurez & Potencia
+```{r echo=TRUE}
+##Madurez ~ Potencia 
+datos_centro <- read_excel("Coho Season 2021-2022.xlsx", sheet = "Site detail", skip = 2) %>% 
+  clean_names()
+#maduros-potencia (W)
+(maduros_potencia_centro <- datos_centro %>% 
+   ggplot(aes(potencia,percent_maduro)) +
+   geom_point(size=4) +
+   geom_smooth() +
+   theme_minimal() +
+   #scale_x_continuous(labels = percent) +
+   scale_y_continuous(labels = percent) +
+   geom_label_repel(aes(label=site_name)) +
+   labs(title="Relación entre potencia del fotoperiodo y % maduros(planta)",
+        subtitle = "Dato a nivel de centro de cultivo") +
+   theme(axis.line.x = element_line())
+)+
+labs( x="Total power per cage (W)", 
+        y="Mature (%)")#+
+#ylim(0,7)
+```
+
+
+
+
+## Resume los datos usando tablas y estadística descriptiva
+```{r, Table}
+Ma<-table(Madurez$`%Mature`)
+Fo<-table(Madurez$Fotoperiodo)
+Po<-table(Madurez$Potencia)
+mean(Madurez$`%Mature`)
+mean(Madurez$Fotoperiodo)
+mean(Madurez$Potencia)
+sd(Madurez$`%Mature`)
+#sd(Madurez$Fotoperiodo)
+sd(Madurez$Potencia)
+```
+
 # Conclusiones
 
-De acuerdo a la exploración de datos, se puede evidenciar que el proveedor fotoperiodo, presento maduración en los centros de cultivos donde se implento la estrategia en comparación con los centros de cultivo donde no se encontraba implementada la estrategia de Fotoperiodo.
+De acuerdo a la exploración de datos, se puede evidenciar que el proveedor fotoperiodo, presento maduración en los centros de cultivos donde se implentó la estrategia en comparación con los centros de cultivo donde no se encontraba implementada la estrategia de Fotoperiodo.
 
-El Centro de Cultivo que presento mayor madurez (> 5%) correspondio al centro Chidhuapi 1
+El Centro de Cultivo que presentó mayor madurez (> 5%) correspondio al centro Chidhuapi 1
