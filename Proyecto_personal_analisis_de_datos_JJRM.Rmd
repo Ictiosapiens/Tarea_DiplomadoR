@@ -3,8 +3,8 @@ title: "Proyecto personal de análisis de datos"
 author: "Juan José Rodríguez Maulén"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 Evaluación de la Madurez en Salmon Coho (Coho Salmon (COS))
@@ -43,19 +43,18 @@ library(ggrepel)
 ```{r echo=TRUE }
 Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx",na="NA", sheet = 2)
 
-Madurez <- na.omit(Madurez)
+#Madurez <- na.omit(Madurez)
 ```
 
-```{r setup, include=FALSE} 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-```
 
 ```{r echo=TRUE }
 summary(Madurez)
 str(Madurez)
 head(Madurez)
-Madurez$`Jaula individual`<-as.factor(Madurez$`Jaula individual`)
-Madurez$Fotoperiodo <- as.factor(Madurez$Fotoperiodo)
+#Madurez$`Jaula individual`<-as.factor(Madurez$`Jaula individual`)
+#Madurez$Fotoperiodo <- as.factor(Madurez$Fotoperiodo)
+
+
 ```
 ## Describa la variación de las variables usando histogramas
 ```{r echo=TRUE}
@@ -174,3 +173,6 @@ sd(Madurez$Potencia)
 De acuerdo a la exploración de datos, se puede evidenciar que el proveedor fotoperiodo, presento maduración en los centros de cultivos donde se implentó la estrategia en comparación con los centros de cultivo donde no se encontraba implementada la estrategia de Fotoperiodo.
 
 El Centro de Cultivo que presentó mayor madurez (> 5%) correspondio al centro Chidhuapi 1
+
+Enlace a proyecto Github: https://github.com/Ictiosapiens/Tarea_DiplomadoR
+
