@@ -19,6 +19,8 @@ Variable respuesta= % de maduración (Cuantitativa Discreta)
 Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
 N= 220 observaciones.
 
+Hipotesis de investigación: Centros con fotoperiodo no presentan diferencias significativas en el desarrollo de madurez respecto a centros sin fotoperiodo
+
 ## Utiliza paquetes para importar y analizar
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -43,7 +45,7 @@ library(ggrepel)
 ```{r echo=TRUE }
 Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx",na="NA", sheet = 2)
 
-#Madurez <- na.omit(Madurez)
+Madurez <- na.omit(Madurez)
 ```
 
 
