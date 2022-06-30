@@ -14,4 +14,5 @@ Los datos de madurez, correspondieron a las observaciones realizadas en plantas 
 # Variable explicativa= Centro de Cultivo (Cualitativa Nominal) y Potencia (W) (Cuantitativa Discreta)
 # N= 220 observaciones
 
-#Hipotesis de investigación: Centros con fotoperiodo no presentan diferencias significativas en el desarrollo de madurez respecto a centros sin fotoperiodo
+#Hipotesis de investigación: 
+Centros con fotoperiodo no presentan diferencias significativas en el desarrollo de madurez respecto a centros sin fotoperiodo
