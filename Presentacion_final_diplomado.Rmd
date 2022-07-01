@@ -1,0 +1,249 @@
+---
+title: "Presentacion Final Diplomado Analisis de Datos con R"
+author: "Juan José Rodríguez Maulén"
+date: '2022-06-30'
+output:
+  beamer_presentation:
+    theme: Malmoe
+    colortheme: seahorse
+    fonttheme: professionalfonts
+  ioslides_presentation: default
+  slidy_presentation: default
+  urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(xlsx)
+library(readr)
+library(readxl)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(car)
+library(lmtest)
+library(datasets)
+library(stats)
+library(lme4)
+library(Matrix)
+library(psych)
+library(readr)
+library(tidyverse)
+library(janitor)
+library(scales)
+library(ggthemes)
+library(ggrepel)
+
+Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx",na="NA", sheet = 2)
+Madurez <- na.omit(Madurez)
+
+summary(Madurez)
+head(Madurez)
+names(Madurez)
+str(Madurez)
+```
+
+
+## Analisis comparativo de Proveedor de Fotoperiodo y Centros de Cultivo de Salmon Coho sobre la Maduración
+
+**1).** **Descripción del Problema**
+
+**1).** **Descripción de las variables de estudio**
+
+**3).** **Métodos Estadísticos**
+
+**4). ** **Exploración de Datos (EDA)**
+
+**5).** **Hipótesis**
+
+**6).** **Resultados**
+
+
+**4).** **Conclusiones**
+
+## Descripción del Problema
+
+Se observó madurez en peces cultivados en la región de Los Lagos, sometidos a regimen de fotoperiodo para prevenir la madurez. El proveedor de fotoperiodo correspondió a la empresa BIOLED quienes utilizaron 3 intensidades lumínicas (W) en centros de cultivos de peces provenientes de las pisciculturas Huincara, Coipue, Lican y Lago Rupanco. En terminos de madurez observada por mix de jaulas, estas fluctuaron entre un 0 a un 20%, mientras que a nivel de centro de cultivo, esta alcanzo un 6,81% siendo aceptable un 5%.
+
+## Descripción de las variables de estudio
+**FACTORES A ANLIZAR Y NUMERO DE OBSERVACIONES**
+
+Los datos de madurez, correspondieron a las observaciones realizadas en plantas de proceso, para la clasificación de calidades, donde una de las causales de degradación correspondio a madurez por jaula y centro de cultivo
+
+Variable respuesta= % de maduración (Cuantitativa Discreta)
+Variable explicativa= Proveedor de Fotoperiodo y Centro de Cultivo (Cualitativa Nominal)
+N= 220 observaciones.
+
+Para el presente reporte final, la estrategia correspondio al análisis de las categorías Proveedor de Fotoperiodo y Centro de Cultivo (Analisis Univariado de Dos Vías)
+
+## Métodos Estadísticos
+
+Se realizó un analisis exploratorio de datos, para observar patrones, posteriormente se realizó la  evaluación de supuestos a los residuales de los datos, con la finalidad de determinar el metodo estadistico a utilizar.
+
+Dados los reultados gráficos y los p-value resultantes de los test estadisticos para la evaluación de supuestos, se demostro que los residuales no provenian de una distribucion normal. De acuerdo a lo anterior, se ajustaron Modelos Lineales Generalizados y se selecciono el mejor modelo a través del Criterio de Akaike (AIC). 
+
+Como análisis a posteriori, se realizó un test de Tukey para determinar que grupos eran diferentes entre sí.
+
+## 
+
+**Exploración de Datos (EDA)**
+
+
+## Evaluación balanceo de datos **Proveedor**
+Para el caso de la categoría Proveedor, se puede observar que el nivel "Bioled" tiene mayor número de observaciones, por lo tanto, no está totalmente balanceado.
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+P<-table(Madurez$Proveedor)
+P
+
+```
+
+
+## Boxplot para categoría Proveedor
+
+```{r, echo=FALSE,message = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
+  clean_names()
+(Madurez <- Madurez %>% 
+   filter(!is.na(percent_mature)) %>% 
+   mutate(proveedor = fct_relevel(proveedor)) %>% 
+  ggplot(aes(proveedor, percent_mature, fill=proveedor)) +
+   geom_jitter(shape=21, size=4, color="white", width = 0.2) +
+   geom_boxplot(alpha=.5, outlier.color = "NA") +
+   scale_fill_tableau() +
+   theme_minimal() +
+   scale_y_continuous(labels = percent) +
+   labs(title="% Madurez en planta de proceso según Fotoperiodo",
+        subtitle = "Dato a nivel de unidad de proceso en planta") +
+    annotate("segment", x=0.17, xend = 0.8, y=0.2, yend = 0.17, colour="red", size=1, arrow=arrow() )+
+   theme(axis.line.x = element_line(),legend.position='none')
+)+
+labs( x="Proveedor", 
+     y="Mature (%)")
+
+```
+Por otra parte, se observaron datos atipicos (e.g., Flecha Roja) 
+
+
+## Boxplot para categoría Proveedor*Centro
+
+```{r}
+Madurez <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2) %>% 
+  clean_names()
+Madurez$site_name <- factor(Madurez$site_name, levels = c('Chidhuapi 1', 'Chope','Chidhuapi 2', 'Colaco 4','Punta Yoye','Teupa', 'Compu', 'Aulin','Cachihue', 'Chidhuapi 3','Linguar','Malomacum'))
+(Madurez <- Madurez %>% 
+   filter(!is.na(percent_mature)) %>% 
+   mutate(proveedor = fct_relevel(proveedor)) %>% 
+   ggplot(aes(site_name, percent_mature, fill=proveedor)) +
+   geom_jitter(shape=21, size=4, color="white", width = 0.2) +
+   geom_boxplot(alpha=.5, outlier.color = "NA") +
+   scale_fill_tableau() +
+   theme_minimal() +
+   scale_y_continuous(labels = percent) +
+   labs(title="% Madurez en planta segun Centro y Fotoperiodo",
+        subtitle = "Dato a nivel de unidad de proceso en planta") +
+   theme(axis.line.x = element_line())
+)+
+  labs( x="Site Name", 
+        y="Mature (%)")
+```
+
+## Hipotesis por Proveedor de Fotoperiodo & Centro de Cultivo
+**Hipótesis Biologica** = Centros con fotoperiodo, no presentan razgos de madurez
+
+**Hipótesis Estadistica** = Centros con fotoperiodo no presentan diferencias significativas en el desarrollo de madurez respecto a centros sin fotoperiodo.
+
+**Ajuste de Modelo**
+
+
+**Variable Respuesta**= % de maduración (Cuantitativa Discreta)
+**Variable Explicativa** = Categoría Proveedor (Bioled & Control) * Centro de Cultivo
+                          
+                          y ~ B0 + BX1 + BX2 + BX1 * BX2 + E  
+
+
+
+## Evaluación de Supuestos
+```{r, echo=FALSE,message = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+Madurez1 <- read_excel("Coho Season 2021-2022.xlsx", sheet = 2)
+names(Madurez1)[5]<-"Maduro"
+names(Madurez1)[2]<-"Centro"
+names(Madurez1)
+summary(Madurez1)
+Madurez1$Centro<- as.factor(Madurez1$Centro)
+Madurez1$Proveedor<- as.factor(Madurez1$Proveedor)
+```
+
+## Evaluación de Normalidad
+```{r, echo=FALSE,message = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+lm1<-lm(Maduro~Proveedor*Centro, data= Madurez1)
+res1<-resid(lm1)
+shapiro.test(res1)
+qqPlot(res1)
+plot(lm1)
+```
+## Ajuste de Modelo Lineal Generalizado
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+lm1<-lm(Maduro~Proveedor*Centro, data= Madurez1)
+glm2<-glm(Maduro~Proveedor*Centro, data= Madurez1, family="poisson"(link=log))
+install.packages("MASS")
+library(MASS)
+glm3<-glm.nb(Maduro~Proveedor*Centro, data= Madurez1)
+Madurez1$no.maduros<- 1-Madurez1$Maduro
+glm4<-glm(cbind(Maduro,no.maduros)~Proveedor*Centro,data= Madurez1,family=binomial(link=logit))
+
+
+```
+
+## Selecciono el mejor modelo a través de AIC
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+AIC(lm1,glm2, glm3, glm4)
+```
+
+
+
+##Analisis de Varianca de Dos Vias lm1
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+anova(lm1)
+```
+## Test a Posteriori
+
+Aulin    Cachihue Chidhuapi 1 Chidhuapi 2 Chidhuapi 3       Chope    Colaco 4 
+        "a"         "a"         "c"         "a"         "a"         "b"         "a" 
+      Compu     Linguar   Malomacum  Punta Yoye       Teupa 
+        "a"         "a"         "a"         "a"         "a" 
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+install.packages("multcomp")
+library(multcomp)
+
+lm1.1<-lm(Maduro~Centro, data= Madurez1)
+glht1<-glht(lm1.1,linfct=mcp(Centro="Tukey"))
+summary(glht1)
+cld(glht1)
+
+
+```
+## Conclusiones
+
+De acuerdo a la exploración de datos, se puede evidenciar que el proveedor fotoperiodo, presento maduración en los centros de cultivos donde se implentó la estrategia en comparación con los centros de cultivo donde no se encontraba implementada la estrategia de Fotoperiodo.
+
+El Centro de Cultivo que presentó mayor madurez (> 5%) correspondio al centro Chidhuapi 1
+
+Los residuales de los datos no presentaron una distribucion normal ni homocedasticidad
+
+Se intentaron ajustar Modelos Lineales Generalizados, pero las seleccion por el Criterio de Akaike, no fue coherente, dado que el mejor modelo correspondio al modelo lineal, el cual violo los supuestos.
+
+Aun asi, se realizo el test de Analisis de Varianza, donde se evidencio evidencia estadistica para rechazar la hipotesis de investigación. El Test a psoterirori, represento aquelos centros con diferencia, no obstante, el modelo seleccionado, no es el adecuado
+
+Enlace a proyecto Github: https://github.com/Ictiosapiens/Tarea_DiplomadoR
+

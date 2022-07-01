@@ -21,15 +21,13 @@ N= 220 observaciones.
 
 Hipotesis de investigación: Centros con fotoperiodo no presentan diferencias significativas en el desarrollo de madurez respecto a centros sin fotoperiodo
 
-## Utiliza paquetes para importar y analizar
+## Utiliza paquetes para importar y analizar datos.
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
-## En este bloque de código podrían ir todos los paquetes que necesite habilitar o install.packages
 library(datasets)
 library(ggplot2)
 library(readxl)
 library(stats)
-install.packages("lme4")
 library(lme4)
 library(Matrix)
 library(psych)
@@ -39,41 +37,80 @@ library(janitor)
 library(scales)
 library(ggthemes)
 library(ggrepel)
-```
+library(xlsx)
+library(gridExtra)
 
-
-```{r echo=TRUE }
 Madurez <- read_excel("/cloud/project/Coho Season 2021-2022.xlsx",na="NA", sheet = 2)
-
 Madurez <- na.omit(Madurez)
-```
 
-
-```{r echo=TRUE }
-summary(Madurez)
-str(Madurez)
-head(Madurez)
+############################################################################################
+#Madurez$JAULA <- as.factor (Madurez$JAULA)
+#Madurez$Centro2 <- as.factor (Madurez$Centro2)
+#Madurez$SEXO <- as.factor (Madurez$SEXO)
+#Madurez$`TIPO GRUPO` <- as.factor (Madurez$`TIPO GRUPO`)
+#Madurez$Tipo_Sexo <- as.factor (Madurez$Tipo_Sexo)
 #Madurez$`Jaula individual`<-as.factor(Madurez$`Jaula individual`)
 #Madurez$Fotoperiodo <- as.factor(Madurez$Fotoperiodo)
+```
 
+## Resumen
+Para obtención de estadística descriptiva
+```{r Summary, echo=TRUE }
+summary(Madurez)
+head(Madurez)
+names(Madurez)
+```
+
+## Resumen de los datos
+Categorias definidad por: Jaula, Site name, Cage, Origen, Proveedor, Potencia
+```{r Exploratorio, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+str(Madurez)
+```
+
+## Evaluación balanceo de datos **Site Name**
+
+Para el caso de la categoría Site name, se puede observar que los niveles "Chidhuapi 1"; "Chope" y "Colaco 4" tienen el mayor número de observaciones, mientras que los demas  niveles, presentan menos de cinco observaciones, por lo tanto, no está totalmente balanceado.
+```{r, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+table(Madurez$`Site Name`)
 
 ```
+
+## Evaluación balanceo de datos **Proveedor**
+
+Para el caso de la categoría Proveedor, se puede observar que el nivel "Bioled" tiene mayor número de observaciones, por lo tanto, no está totalmente balanceado.
+```{r, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+table(Madurez$Proveedor)
+
+```
+
+## Evaluación balanceo de datos **Tipo Origen**
+
+Para el caso de la categoría Tipo Origen, se puede observar que el nivel "Lago" tiene mayor número de observaciones respecto a Pscicultura, por lo tanto, no está totalmente balanceado.
+
+```{r, echo=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+table(Madurez$`Tipo orgien`)
+
+```
+
+
 ## Describa la variación de las variables usando histogramas
-```{r echo=TRUE}
-#Describe la variación de las variables de estudio usando histograma
+```{r Histogramas, echo=TRUE}
 #hist(Madurez$Fotoperiodo,  main = "Fotoperiodo", col = "red")
-hist(Madurez$Potencia, main = "Potencia", col = "red")
-hist(Madurez$`%Mature`,main = "%Madurez", col = "red")
-Ma<-table(Madurez$`%Mature`)
-Fo<-table(Madurez$Fotoperiodo)
-Po<-table(Madurez$Potencia)
-barplot(Ma,col="deepskyblue4",  ylim=c(0,25))
-barplot(Fo,col="deepskyblue4",  ylim=c(0,25))
-barplot(Po,col="deepskyblue4",  ylim=c(0,25))
-ggplot(Madurez, aes(x = Fotoperiodo)) +geom_histogram(bins = 30, color = "black", fill="red")
-ggplot(Madurez, aes(x = Potencia)) +geom_histogram(bins = 30, color = "black", fill="red")
-ggplot(Madurez, aes(x = `%Mature`)) +geom_histogram(bins = 30, color = "black", fill="red")
-plot(Madurez$`%Mature`~Madurez$Potencia)
+
+Hist_Madurez<-ggplot(Madurez, aes(x = `%Mature`)) +geom_histogram(bins = 30, color = "black", fill="red")
+
+ P<-Madurez %>% select("Potencia") %>% ggplot(aes(x= Potencia))+
+  geom_histogram(binwidth = 1, alpha=0.9, position = "identity", color="gold")+
+  ylab("Frecuencia")+
+  ggtitle("Histograma Madurez")
+
+grid.arrange(Hist_Madurez, P, nrow =2)
+
+
 plot(density(Madurez$Potencia))
 plot(ecdf(Madurez$`%Mature`))
 plot(ecdf(Madurez$Potencia))
@@ -177,4 +214,18 @@ De acuerdo a la exploración de datos, se puede evidenciar que el proveedor foto
 El Centro de Cultivo que presentó mayor madurez (> 5%) correspondio al centro Chidhuapi 1
 
 Enlace a proyecto Github: https://github.com/Ictiosapiens/Tarea_DiplomadoR
+
+## Variación de la variable respuesta usando histogramas
+
+```{r}
+Hist_Madurez<-ggplot(Madurez, aes(x = `%Mature`)) +geom_histogram(bins = 30, color = "black", fill="red")+ ggtitle("Histograma Madurez")+ ylab("Frecuencia")
+
+M<-plot(ecdf(Madurez$`%Mature`))
+P<-plot(ecdf(Madurez$Fotoperiodo))
+
+grid.arrange(Hist_Madurez, M, P, nrow =3)
+
+
+
+```
 
